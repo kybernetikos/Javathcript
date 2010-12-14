@@ -1,7 +1,12 @@
 <html>
 	<head><meta http-equiv="Refresh" content="0; url=http://kybernetikos.github.com/Javathcript/webcontent/" /></head>
 <body>
-	  <p>This site is located <a href="http://kybernetikos.github.com/Javathcript/webcontent/">here</a></p>
+	  <p id='p' style='display: none'>This site is located <a href="http://kybernetikos.github.com/Javathcript/webcontent/">here</a></p>
+	<script type="text/javascript">
+		setTimeout(function() {	
+			document.getElementById('p').style.display = 'inline';
+		}, 100);
+	</script>
 </body>
 </html>
 
