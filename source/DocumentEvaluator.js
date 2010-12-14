@@ -52,7 +52,7 @@ function evalScriptTagJob(txt) {
 	};
 };
 
-window.addEventListener("DOMContentLoaded", function() {
+window.onload = function() {
 	var scripts = document.getElementsByTagName("script");
 	for (var i = 0; i < scripts.length; ++i) {
 		var script = scripts[i];
@@ -65,4 +65,4 @@ window.addEventListener("DOMContentLoaded", function() {
 			}
 		} 
 	} 
-}, false);
+};
