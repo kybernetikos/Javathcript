@@ -33,8 +33,15 @@ var Environment = (function() {
 		} else if (b instanceof Atom) {
 			return false;
 		}
+
+		// Empty array is equal to empty string.
+		var aIsEmpty = (a instanceof Array || typeof(a) == 'string') && a.length == 0;
+		var bIsEmpty = (b instanceof Array || typeof(b) == 'string') && b.length == 0;
+		if (aIsEmpty && bIsEmpty) {
+			return true;
+		}
 		
-		if (a instanceof Array || b instanceof Array) {
+		if (a instanceof Array && b instanceof Array) {
 			if (a.length != b.length) {
 				return false;
 			}

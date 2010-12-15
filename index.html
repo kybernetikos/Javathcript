@@ -4,6 +4,8 @@
 	
 	<link rel="stylesheet" href="webcontent/style/main.css" />
 	
+	<!--[if IE]><script type="text/javascript" src="webcontent/lib/excanvas.js"></script><![endif]-->
+	
 	<script type="text/javascript" src="webcontent/Javathcript.js"></script>
 	<script type="text/lisp" src="webcontent/lisp/prelude.lsp"></script>
 	
@@ -39,7 +41,7 @@
 			for (var func in Javathcript.environment) {
 				func = func.replace(/\*/g, "\\*");
 				if ("<span class='func'></span>t".indexOf(func) < 0) {
-					code = code.replace(new RegExp("\\("+func, "g"), "(<span class='func'>"+func+"</span>");
+					code = code.replace(new RegExp("\\("+func+" ", "g"), "(<span class='func'>"+func+"</span> ");
 				}
 				code = code.replace(/(\"[^\"]*\")/g, "<span class='string'>$1</span>");
 			}
@@ -341,6 +343,8 @@
 	<canvas width='320' height='240' id='cnv'></canvas>
 	
 	<script id='canvaslisp' type="text/lisp">
+	(if (null (get (getElement "cnv") "getContext"))
+		(message "Your browser doesn't have canvas support, so the canvas demo won't work")
 		(let*
 			(	(g (js "document.getElementById('cnv').getContext('2d')"))
 				(fill (method g "fill"))
@@ -377,6 +381,7 @@
 				(stroke)
 			)
 		)
+)
 	</script>
 	<pre id='canvassrc'>
 	</pre>

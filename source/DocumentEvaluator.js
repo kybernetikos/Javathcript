@@ -63,7 +63,15 @@ function evalScriptTagJob(script) {
 	};
 };
 
-window.onload = function() {
+function addListener(elem, event, listener) {
+	if (elem.addEventListener) {  
+		elem.addEventListener(event, listener, false);   
+	} else if (elem.attachEvent){  
+		elem.attachEvent('on'+event, listener);  
+	}  
+}
+
+function parseLispTags() {
 	var scripts = document.getElementsByTagName("script");
 	for (var i = 0; i < scripts.length; ++i) {
 		var script = scripts[i];
@@ -77,3 +85,5 @@ window.onload = function() {
 		} 
 	} 
 };
+
+addListener(window, "load", function() {setTimeout(parseLispTags, 0);});
