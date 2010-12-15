@@ -251,6 +251,8 @@
 	so that it will evaluate its arguments in the current <em>Javathcript</em> scope before executing.  If the result is a function that belongs to an
 	object, executing separately will unbind the function from the object it was connected to (the <code>this</code> reference will be wrong).  In that
 	case, you should use <code>(method object "methodname")</code> to get a reference to the function that will execute against the provided object.</p>
+
+	<p>Check out the <a href="#advanced-canvas">Graphics and the Canvas tag</a> section to see an example of some of this in action.</p>
 	
 	<p>While <em>Javathcript</em> functions turn into normal javascript functions, they are bound to the scope that they execute in, and won't work if
 	disconnected from that scope.  If you want to call them from, e.g. event handlers, then you can use the <code>export</code> function to create
