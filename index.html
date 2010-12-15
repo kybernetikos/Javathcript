@@ -80,6 +80,7 @@
 				<li><a href="#functions-js">Interacting with Javascript and the Browser</a></li>
 			</ol>
 		</li>
+		<li><a href="#advanced">More Examples</a></li>
 		<li><a href="#have-a-go">Have a Go</a></li>
 		<li><a href="#getting-source">Getting the Source</a></li>
 		<li><a href="#limitations">Limitations</a></li>
@@ -245,6 +246,18 @@
 		                "(get body offsetWidth)",
 		                "; Make sure your window isn't maximised if you want this to work\n\t(let\t((moveBy (method window \"moveBy\")))\n\t\t(moveBy (- (* (random) 10) 5) (- (* (random) 10) 5) ))"
 		                ]);
+	</script>
+
+	<a name="advanced"><h2>More Examples</h2></a>
+	
+	<p>The <a href="">Y combinator</a> is "one of the most strange and wonderful artifacts of Computer Science" according to Douglas Crockford.
+ It allows you to write an anoymous function that can use recursion (not that this is something that comes up a lot...).  There's a good explanation of it <a href="http://rayfd.wordpress.com/2007/05/06/y-combinator-for-dysfunctional-non-schemers/">here</a>.</p>
+	
+	<script type="text/javascript">
+		insertExamples([
+			"(def Y\n  (lambda (f)\n    (let ((future\n            (lambda (future)\n              (f (lambda (arg) \n                   ((future future) arg))))))\n      (future future))))",
+			"((Y (lambda (fac)\n      (lambda (n)\n        (if (= n 0)\n            1\n            (* n (fac (- n 1)))))))\n5)"
+		]);	
 	</script>
 
 	<a name="have-a-go"><h2>Have a go</h2></a>
