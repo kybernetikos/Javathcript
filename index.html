@@ -8,7 +8,7 @@
 	<script type="text/lisp" src="webcontent/lisp/prelude.lsp"></script>
 	
 	<script type="text/javascript">
-		function evaluateElement(srcElementName, resultElementName) {
+		function evaluateElement(srcElementName, resultElementName, multi) {
 			var srcElement = document.getElementById(srcElementName);
 			var code = null;
 			if (srcElement.value) {
@@ -20,8 +20,13 @@
 			code = code.replace(/<\/span[^>]*>/gi, '');
 			code = code.replace(/&gt;/g, ">");
 			code = code.replace(/&lt;/g, "<");
+			var result = "";
 			try {
-				var result = Javathcript.eval(code);
+				if (multi) {
+					result = Javathcript.evalMulti(code);
+				} else {
+					result = Javathcript.eval(code);
+				}
 			} catch (e) {
 				result = "Error: "+e.message;
 			}
@@ -40,12 +45,22 @@
 			}
 			return code;
 		}
+		
+		function executeByCode(from, to) {
+			for (var i = from; i <= to; ++i) {
+				evaluateElement('javathcript_example_'+i, 'javathcript_example_result_'+i);
+			}			
+		}
+		
 		var divId = 0;
 		function insertExamples(examples) {
+			var start = divId;
 			for (var i = 0; i < examples.length; ++i) {
 				var id = divId ++;
 				document.write("<pre class='evaluable' onclick=\"evaluateElement('javathcript_example_"+id+"', 'javathcript_example_result_"+id+"')\" id='javathcript_example_"+id+"'>"+format(examples[i])+"</pre><pre class='result' id='javathcript_example_result_"+id+"'></pre>");
 			}
+			var stop = divId - 1;
+			document.write("<div style='text-align: right'><button class='executeAll' onclick='executeByCode("+start+", "+stop+")'>All</button></div>");
 		}
 		
 	</script>
@@ -257,6 +272,52 @@
 		insertExamples([
 			"(def Y\n  (lambda (f)\n    (let ((future\n            (lambda (future)\n              (f (lambda (arg) \n                   ((future future) arg))))))\n      (future future))))",
 			"((Y (lambda (fac)\n      (lambda (n)\n        (if (= n 0)\n            1\n            (* n (fac (- n 1)))))))\n5)"
+		]);	
+	</script>
+	
+	<p>The <em>Micro-manual</em> included a Lisp interpreter written in lisp.  Here is a slightly modification of it that I took from <a href="http://lib.store.yahoo.net/lib/paulgraham/jmc.lisp">here</a>.</p>
+
+	<script type="text/javascript">
+		insertExamples([";\n; The Lisp defined in McCarthy's 1960 paper, translated into CL.\n; Assumes only quote, atom, eq, cons, car, cdr, cond.\n; Bug reports to lispcode@paulgraham.com.\n(defun null. (x)\n  (eq x '()))",
+		                "(defun and. (x y)\n  (cond (x (cond (y 't) ('t '())))\n        ('t '())))",
+		                "(defun not. (x)\n  (cond (x '())\n        ('t 't)))",
+		                "(defun append. (x y)\n  (cond ((null. x) y)\n        ('t (cons (car x) (append. (cdr x) y)))))",
+		                "(defun list. (x y)\n  (cons x (cons y '())))",
+		                "(defun pair. (x y)\n  (cond ((and. (null. x) (null. y)) '())\n        ((and. (not. (atom x)) (not. (atom y)))\n         (cons (list. (car x) (car y))\n               (pair. (cdr x) (cdr y))))))",
+						"(defun assoc. (x y)\n  (cond ((eq (caar y) x) (cadar y))\n        ('t (assoc. x (cdr y)))))",
+						"(defun eval. (e a)\n  (cond\n"+
+						"    ((atom e) (assoc. e a))\n"+
+						"    ((atom (car e))\n"+
+						"     (cond\n"+
+						"       ((eq (car e) 'quote) (cadr e))\n"+
+						"       ((eq (car e) 'atom)  (atom   (eval. (cadr e) a)))\n"+
+						"       ((eq (car e) 'eq)    (eq     (eval. (cadr e) a)\n"+
+						"                                    (eval. (caddr e) a)))\n"+
+						"       ((eq (car e) 'car)   (car    (eval. (cadr e) a)))\n"+
+						"       ((eq (car e) 'cdr)   (cdr    (eval. (cadr e) a)))\n"+
+						"       ((eq (car e) 'cons)  (cons   (eval. (cadr e) a)\n"+
+						"                                    (eval. (caddr e) a)))\n"+
+						"       ((eq (car e) 'cond)  (evcon. (cdr e) a))\n"+
+						"       ('t (eval. (cons (assoc. (car e) a)\n"+
+						"                        (cdr e))\n"+
+						"                  a))))\n"+
+						"    ((eq (caar e) 'label)\n"+
+						"     (eval. (cons (caddar e) (cdr e))\n"+
+						"            (cons (list. (cadar e) (car e)) a)))\n"+
+						"    ((eq (caar e) 'lambda)\n"+
+						"     (eval. (caddar e)\n"+
+						"            (append. (pair. (cadar e) (evlis. (cdr e) a))\n"+
+						"                     a)))))",
+						"(defun evcon. (c a)\n"+
+						"  (cond ((eval. (caar c) a)\n"+
+						"         (eval. (cadar c) a))\n"+
+						"        ('t (evcon. (cdr c) a))))",
+						"(defun evlis. (m a)\n"+
+						"  (cond ((null. m) '())\n"+
+						"        ('t (cons (eval.  (car m) a)\n"+
+						"                  (evlis. (cdr m) a)))))",
+						"; Now to use it..\n"+
+						"(eval. '(car (quote (a b c))))"
 		]);	
 	</script>
 
