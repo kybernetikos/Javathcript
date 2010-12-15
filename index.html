@@ -46,7 +46,7 @@
 
 	<a name="top"><h1>Javathcript - Javascript with a lisp</h1></a>
 	
-	<p>Javathcript allows you to script your web pages in a simple lisp variant.  Once you include <a href="Javathcript.js">Javathcript.js</a>,
+	<p>Javathcript allows you to script your web pages in a simple lisp variant.  Once you include <a href="webcontent/Javathcript.js">Javathcript.js</a>,
 	 any script tags in your document with <code>type="text/lisp"</code> will be evaluated.  It will also download lisp files (only from the original server),
 	 if you have a script tag that has a <code>src</code> attribute.  Finally, you can also evaluate lisp code from javascript using
 	  <code>Javathcript.eval(lispString)</code>.</p>
@@ -80,8 +80,8 @@
 	
 	<a name="usage"><h2>Example Usage</h2></a>
 	
-	<p>Since the browser doesn't natively understand script tags with <code>type="text/lisp"</code>, the <a href="Javathcript.js">Javathcript.js</a> file
-	is included in the header to provide parsing and evaluation for lisp code.  We have also included the <a href="lisp/prelude.lsp">prelude.lsp</a> lisp
+	<p>Since the browser doesn't natively understand script tags with <code>type="text/lisp"</code>, the <a href="webcontent/Javathcript.js">Javathcript.js</a> file
+	is included in the header to provide parsing and evaluation for lisp code.  We have also included the <a href="webcontent/lisp/prelude.lsp">prelude.lsp</a> lisp
 	source file in the header since it defines a number of functions that this code uses (e.g. <code>getElement</code> and <code>alert</code>).
 	To include these files, the following script tags are in the head of this page.  Note that the <code>prelude.lsp</code> file has to be served from the same
 	server as any page that uses it, as it is fetched by an XHR.
@@ -153,7 +153,7 @@
 	<p>You can quote something by simply putting the single quote in front of it.  This is a bit more terse than having to wrap it in <code>(quote ...)</code>.
 	Comments are lines that start with the <code>;</code> character.  <code>if</code> provides a slighly more intuitive alternative to <code>cond</code>.</p>
 	
-	<p>A number of aliases are provided in the <a href="lisp/prelude.lsp">prelude.lsp</a> file, eg. <code>eq eq? head tail first rest</code>, as well as
+	<p>A number of aliases are provided in the <a href="webcontent/lisp/prelude.lsp">prelude.lsp</a> file, eg. <code>eq eq? head tail first rest</code>, as well as
 	a number of useful functions, e.g. <code>map</code>.</p>
 	
 	<a name="functions-strings"><h3>Strings</h3></a>
@@ -179,11 +179,11 @@
 	
 	<code>plus minus divide times rem &lt; &gt; &lt;= &gt;= = /=</code>
 	
-	<p><em>Javathcript</em> supports numeric literals, and the normal arithmetic functions (which are aliased by <a href="lisp/prelude.lsp">prelude.lsp</a> to be accessible by the symbols too).</p>
+	<p><em>Javathcript</em> supports numeric literals, and the normal arithmetic functions (which are aliased by <a href="webcontent/lisp/prelude.lsp">prelude.lsp</a> to be accessible by the symbols too).</p>
 	
 	<code>sin cos tan asin acos atan floor max min log abs ceil pow exp atan2 random sqrt round</code>
 	
-	<p>The <a href="lisp/prelude.lsp">prelude.lsp</a> also imports all the javascript Math functions.</p>
+	<p>The <a href="webcontent/lisp/prelude.lsp">prelude.lsp</a> also imports all the javascript Math functions.</p>
 	
 	<script type="text/javascript">
 		insertExamples([
@@ -227,7 +227,7 @@
 	
 	<code>document body window getElement alert message confirm</code>
 	
-	<p>These functions are defined in the <a href="lisp/prelude.lsp">prelude.lsp</a> file, and provide you references to the document and the window.  <code>getElement</code> is
+	<p>These functions are defined in the <a href="webcontent/lisp/prelude.lsp">prelude.lsp</a> file, and provide you references to the document and the window.  <code>getElement</code> is
 	the same as javascript <code>getElementById</code>, and message is a synonym for <code>alert</code>.</p>
 
 	<script type="text/javascript">
