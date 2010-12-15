@@ -1,5 +1,4 @@
 var WorkQueue = (function() {
-	
 	function WorkQueue() {
 		this.ready = true;
 		this.queue = [];
@@ -27,63 +26,64 @@ var WorkQueue = (function() {
 			job(done);
 		}, 0);
 	};
-	
 	return new WorkQueue();
 })();
 
-function evalFileJob(src) {
-	return function(done) {
-		var req = new XMLHttpRequest();
-		req.open('GET', src, true);
-		req.onreadystatechange = function (aEvt) {
-			if (req.readyState == 4 && req.status == 200) {
-				try {
-					Javathcript.evalMulti(req.responseText);
-				} catch (e) {
-					setTimeout(done, 0);
-					throw e;
+(function() {
+	function evalFileJob(src) {
+		return function(done) {
+			var req = new XMLHttpRequest();
+			req.open('GET', src, true);
+			req.onreadystatechange = function (aEvt) {
+				if (req.readyState == 4 && req.status == 200) {
+					try {
+						Javathcript.evalMulti(req.responseText);
+					} catch (e) {
+						setTimeout(done, 0);
+						throw e;
+					}
+					done();
 				}
-				done();
-			}
+			};
+			req.send(null);
 		};
-		req.send(null);
-	};
-}
+	}
 
-function evalScriptTagJob(script) {
-	var txt = script.text;
-	return function(done) {
-		try {
-			Javathcript.evalMulti(txt);
-		} catch (e) {
-			setTimeout(done, 0);
-			throw e;
-		}
-		done();
-	};
-};
-
-function addListener(elem, event, listener) {
-	if (elem.addEventListener) {  
-		elem.addEventListener(event, listener, false);   
-	} else if (elem.attachEvent){  
-		elem.attachEvent('on'+event, listener);  
-	}  
-}
-
-function parseLispTags() {
-	var scripts = document.getElementsByTagName("script");
-	for (var i = 0; i < scripts.length; ++i) {
-		var script = scripts[i];
-		if (script.getAttribute("type") == "text/lisp") {
-			var src = script.getAttribute("src");
-			if (src != null && src != "") {
-  				WorkQueue.add(evalFileJob(src));
-			} else {
-				WorkQueue.add(evalScriptTagJob(script));
+	function evalScriptTagJob(script) {
+		var txt = script.text;
+		return function(done) {
+			try {
+				Javathcript.evalMulti(txt);
+			} catch (e) {
+				setTimeout(done, 0);
+				throw e;
 			}
-		} 
-	} 
-};
+			done();
+		};
+	};
 
-addListener(window, "load", function() {setTimeout(parseLispTags, 0);});
+	function addListener(elem, event, listener) {
+		if (elem.addEventListener) {  
+			elem.addEventListener(event, listener, false);   
+		} else if (elem.attachEvent){  
+			elem.attachEvent('on'+event, listener);  
+		}  
+	}
+
+	function parseLispTags() {
+		var scripts = document.getElementsByTagName("script");
+		for (var i = 0; i < scripts.length; ++i) {
+			var script = scripts[i];
+			if (script.getAttribute("type") == "text/lisp") {
+				var src = script.getAttribute("src");
+				if (src != null && src != "") {
+	  				WorkQueue.add(evalFileJob(src));
+				} else {
+					WorkQueue.add(evalScriptTagJob(script));
+				}
+			} 
+		} 
+	};
+
+	addListener(window, "load", parseLispTags);
+})();
