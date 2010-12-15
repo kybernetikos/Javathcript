@@ -117,3 +117,8 @@ pre {
 	width: 204px;
 	height: 20px;
 }
+
+canvas {
+	border: 1px solid black;
+	margin-left: 4em;
+}

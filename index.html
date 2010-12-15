@@ -320,7 +320,59 @@
 						"(eval. '(cons (quote x) (cdr (quote (a b c)))))"
 		]);	
 	</script>
-
+	
+	<p>The following image was rendered into a canvas by some <em>Javathcript</em> code in an embedded script tag (obviously this will only work
+	if your browser supports canvas):</p>
+	
+	<canvas width='320' height='240' id='cnv'></canvas>
+	
+	<script id='canvaslisp' type="text/lisp">
+		(let*
+			(	(g (js "document.getElementById('cnv').getContext('2d')"))
+				(fill (method g "fill"))
+				(begin (method g "beginPath"))
+				(close (method g "closePath"))
+				(line (method g "lineTo"))
+				(move (method g "moveTo"))
+				(stroke (method g "stroke"))
+				(rect (method g "rect"))
+				(tri (lambda (x y base height) 
+							(list 
+								(begin)
+								(move (- x (/ base 2)) y)
+								(line x (+ y height))
+								(line (+ x (/ base 2)) y)
+								(close)
+							)
+						))
+			)
+			(list 
+				(begin)
+				(set g "strokeStyle" "#ff2222")
+				(set g "fillStyle" "#ffaaaa") 
+				(set g "lineWidth" 3)
+				(begin)
+				(rect 100 100 50 50)
+				(close)
+				(fill)
+				(stroke)
+				(set g "strokeStyle" "#22ff22")
+				(set g "fillStyle" "#aaffaa") 
+				(tri 200 50 70 70)
+				(fill)
+				(stroke)
+			)
+		)
+	</script>
+	<pre id='canvassrc'>
+	</pre>
+	<script>
+		var canvassrc = document.getElementById('canvassrc');
+		var scripttag = document.getElementById('canvaslisp');
+		canvassrc.innerHTML = "&lt;script id='canvaslisp' type=\"text/lisp\"&gt;"+format(scripttag.text)+"\n&lt;/script&gt;";
+	</script>
+	
+	
 	<a name="have-a-go"><h2>Have a go</h2></a>
 	
 	<textarea id='code_entry'>(let 
