@@ -391,7 +391,7 @@ var Environment = (function() {
 				}
 				return result;
 			}
-			throw new Error(head+" not a function in environment when trying to evaluate "+e);
+			throw new Error(head+" ("+headFunc+") not a function in environment when trying to evaluate "+e);
 		} else if (e instanceof Atom) {
 			if (this[e.name] != null) {
 				return this[e.name];
