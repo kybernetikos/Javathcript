@@ -1,3 +1,13 @@
+/*
+* This is a parsing framework and a few Utility classes.
+*
+* Significant portions of this code were ported by kybernetikos from Java code.
+*
+* The Java code is (c) Steven John Metsker and was companion to his book Building Parsers With Java.
+* http://oozinoz.xp123.com/bpwj.htm In that book, he gave permission for the code to be used as
+* the reader wished, as long as they do not claim that they wrote it.
+*
+*/
 var Util=function(){function Util(){}Util.prototype.extend=function(subclass,superclass){var intermediate=function(){};intermediate.prototype=superclass.prototype;subclass.prototype=new intermediate};Util.prototype.bind=function(object,func){if(typeof func=="string")func=object[func];if(typeof func!="function")throw new Error("Invalid function passed to bind");return function(){func.apply(object,arguments)}};Util.prototype.getFile=function getFile(url,successHandler,failureHandler,timeout,timeoutHandler){var req=
 new XMLHttpRequest;req.open("GET",url,true);req.onreadystatechange=function(aEvt){if(req.readyState==4)if(req.status==200||url.substring(0,5)=="file:"&&req.status==0)successHandler(req.responseText,req.getAllResponseHeaders());else if(failureHandler!=null)failureHandler(url,req.status)};req.send(null);if(timeout!=null&&timeout>0)setTimeout(function(){req.abort();if(timeoutHandler!=null)timeoutHandler(url,timeout)},timeout)};Util.prototype.lazy=function(initialise){var value=null;return function(){if(value==
 null)value=initialise();return value}};Util.prototype.startsWith=function startsWith(sPrefix,sString){if(sPrefix==null||sString==null)return false;if(sPrefix=="")return true;if(sString.length<sPrefix.length)return false;return sString.substring(0,sPrefix.length)==sPrefix};Util.prototype.clamp=function clamp(value,min,max){return Math.min(Math.max(value,min),max)};Util.prototype.random=function random(arrayLength){return Math.floor(Math.random()*arrayLength)};Util.prototype.store=function store(name,

@@ -37,7 +37,12 @@ function evalFileJob(src) {
 		req.open('GET', src, true);
 		req.onreadystatechange = function (aEvt) {
 			if (req.readyState == 4 && req.status == 200) {
-				Javathcript.evalMulti(req.responseText);
+				try {
+					Javathcript.evalMulti(req.responseText);
+				} catch (e) {
+					setTimeout(done, 0);
+					throw e;
+				}
 				done();
 			}
 		};
@@ -45,9 +50,15 @@ function evalFileJob(src) {
 	};
 }
 
-function evalScriptTagJob(txt) {
+function evalScriptTagJob(script) {
+	var txt = script.text;
 	return function(done) {
-		Javathcript.evalMulti(txt);
+		try {
+			Javathcript.evalMulti(txt);
+		} catch (e) {
+			setTimeout(done, 0);
+			throw e;
+		}
 		done();
 	};
 };
@@ -61,7 +72,7 @@ window.onload = function() {
 			if (src != null && src != "") {
   				WorkQueue.add(evalFileJob(src));
 			} else {
-				WorkQueue.add(evalScriptTagJob(script.text));
+				WorkQueue.add(evalScriptTagJob(script));
 			}
 		} 
 	} 
