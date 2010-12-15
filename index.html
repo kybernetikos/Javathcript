@@ -252,7 +252,7 @@
 	<textarea id='code_entry'>(let 
 	((curry2 
 		(lambda (func) (lambda (a) (lambda (b) (func a b)))))) 
-		(((curry2 +) 3) 5)
+	(((curry2 +) 3) 5)
 )</textarea>
 	<pre id='code_result' class='result'></pre>
 	<button id='eval' onclick="evaluateElement('code_entry', 'code_result')">Evaluate</button>
