@@ -1,12 +1,284 @@
 <html>
-	<head><meta http-equiv="Refresh" content="0; url=http://kybernetikos.github.com/Javathcript/webcontent/" /></head>
-<body>
-	  <p id='p' style='display: none'>This site is located <a href="http://kybernetikos.github.com/Javathcript/webcontent/">here</a></p>
+<head>
+	<title>Javathcript - Javascript with a lisp</title>
+	
+	<link rel="stylesheet" href="webcontent/style/main.css" />
+	
+	<script type="text/javascript" src="webcontent/Javathcript.js"></script>
+	<script type="text/lisp" src="webcontent/lisp/prelude.lsp"></script>
+	
 	<script type="text/javascript">
-		setTimeout(function() {	
-			document.getElementById('p').style.display = 'inline';
-		}, 100);
-	</script>
-</body>
-</html>
+		function evaluateElement(srcElementName, resultElementName) {
+			var srcElement = document.getElementById(srcElementName);
+			var code = srcElement.innerHTML.toString();
+			code = code.replace(/<span[^>]*>/gi, '');
+			code = code.replace(/<\/span[^>]*>/gi, '');
+			code = code.replace(/&gt;/g, ">");
+			code = code.replace(/&lt;/g, "<");
+			var result = Javathcript.eval(code);
+			var resultElement = document.getElementById(resultElementName);
+			resultElement.style.display = 'block';
+			resultElement.innerHTML = result.toString();
+		}
 
+		function format(code) {
+			for (var func in Javathcript.environment) {
+				func = func.replace(/\*/g, "\\*");
+				if ("<span class='func'></span>t".indexOf(func) < 0) {
+					code = code.replace(new RegExp("\\("+func, "g"), "(<span class='func'>"+func+"</span>");
+				}
+				code = code.replace(/(\"[^\"]*\")/g, "<span class='string'>$1</span>");
+			}
+			return code;
+		}
+		var divId = 0;
+		function insertExamples(examples) {
+			for (var i = 0; i < examples.length; ++i) {
+				var id = divId ++;
+				document.write("<pre class='evaluable' onclick=\"evaluateElement('javathcript_example_"+id+"', 'javathcript_example_result_"+id+"')\" id='javathcript_example_"+id+"'>"+format(examples[i])+"</pre><pre class='result' id='javathcript_example_result_"+id+"'></pre>");
+			}
+		}
+		
+	</script>
+</head>
+
+<body>
+
+	<a name="top"><h1>Javathcript - Javascript with a lisp</h1></a>
+	
+	<p>Javathcript allows you to script your web pages in a simple lisp variant.  Once you include <a href="Javathcript.js">Javathcript.js</a>,
+	 any script tags in your document with <code>type="text/lisp"</code> will be evaluated.  It will also download lisp files (only from the original server),
+	 if you have a script tag that has a <code>src</code> attribute.  Finally, you can also evaluate lisp code from javascript using
+	  <code>Javathcript.eval(lispString)</code>.</p>
+	
+	<p>While it is not an exact implementation of any pre-existing variant of lisp, if you know lisp most of it should be familiar.
+	If you don't you might find it useful to follow a tutorial, e.g. <a href="http://www.n-a-n-o.com/lisp/cmucl-tutorials/LISP-tutorial.html">this one</a>.
+	There <em>will</em> be differences between this implementation and others, but there is also much that is common.</p>
+	
+	<h2>Contents</h2>
+	
+	<ol type="1">
+		<li><a href="#top">Introduction</a></li>
+		<li><a href="#usage">Example Usage</a></li>
+		<li><a href="#functions">Javathcript Functions</a>
+			<ol type="i">
+				<li><a href="#functions-basic">Functions from <em>A Micro-manual for Lisp - Not the Whole Truth</em></a></li>
+				<li><a href="#functions-scope">Scope</a></li>
+				<li><a href="#functions-sugar">Syntactic Sugar, Comments and Aliases</a></li>
+				<li><a href="#functions-strings">Strings</a></li>
+				<li><a href="#functions-numbers">Numbers and Maths</a></li>
+				<li><a href="#functions-objects">Objects</a></li>
+				<li><a href="#functions-js">Interacting with Javascript and the Browser</a></li>
+			</ol>
+		</li>
+		<li><a href="#have-a-go">Have a Go</a></li>
+		<li><a href="#getting-source">Getting the Source</a></li>
+		<li><a href="#limitations">Limitations</a></li>
+		<li><a href="#acknowledgements">Acknowledgements</a></li>
+		<li><a href="#contact">Contact</a></li>
+	</ol>
+	
+	<a name="usage"><h2>Example Usage</h2></a>
+	
+	<p>Since the browser doesn't natively understand script tags with <code>type="text/lisp"</code>, the <a href="Javathcript.js">Javathcript.js</a> file
+	is included in the header to provide parsing and evaluation for lisp code.  We have also included the <a href="lisp/prelude.lsp">prelude.lsp</a> lisp
+	source file in the header since it defines a number of functions that this code uses (e.g. <code>getElement</code> and <code>alert</code>).
+	To include these files, the following script tags are in the head of this page.  Note that the <code>prelude.lsp</code> file has to be served from the same
+	server as any page that uses it, as it is fetched by an XHR.
+
+	<pre>&lt;<span class='tags'>script</span> <span class='attributes'>type</span>=<span class='string'>"text/javascript"</span> <span class='attributes'>src</span>=<span class='string'>"Javathcript.js"</span>&gt;&lt;<span class='tags'>/script</span>&gt;
+&lt;<span class='tags'>script</span> <span class='attributes'>type</span>=<span class='string'>"text/lisp"</span> <span class='attributes'>src</span>=<span class='string'>"lisp/prelude.lsp"</span>&gt;&lt;<span class='tags'>/script</span>&gt;</pre>
+
+	<p>The block of code below attaches a <em>javathcript</em> handler to the <code>onclick</code> attribute of the button.
+	Click the button to see the code execute. <input id='name' type="text" value="Fred"></input><button id='btn'>Click Me</button></p>
+	
+	<script type="text/lisp">
+		(let*
+			(	(button (getElement "btn"))
+				(nameField (getElement "name"))
+				(clickHandler (lambda () (alert (concat "Hello " (get nameField "value")))))	)
+			(set button "onclick" (export clickHandler))
+		)
+	</script>
+	<pre>&lt;<span class='tags'>script</span> <span class='attributes'>type</span>=<span class='string'>"text/lisp"</span>&gt;
+	(<span class='func'>let*</span>
+		(	(button (<span class='func'>getElement</span> <span class='string'>"btn"</span>))
+			(nameField (<span class='func'>getElement</span> <span class='string'>"name"</span>))
+			(clickHandler (<span class='func'>lambda</span> () (<span class='func'>alert</span> (<span class='func'>concat</span> <span class='string'>"Hello "</span> (<span class='func'>get</span> nameField <span class='string'>"value"</span>)))))	)
+		(<span class='func'>set</span> button <span class='string'>"onclick"</span> (<span class='func'>export</span> clickHandler))
+	)
+&lt;<span class='tags'>/script</span>&gt;</pre>
+		
+	<a name="functions"><h2>Javathcript Functions</h2></a>
+	
+	<a name="functions-basic"><h3>Functions from <em>A Micro-manual for Lisp - Not the Whole Truth</em></h3></a>
+	
+	<code>quote car cdr cons equal atom cond lambda label</code>  
+	<p>These functions provide the core of Lisp, and are enough to create a self-hosting LISP interpreter.  Here are some examples (click to evaluate them):</p>
+	<script type="text/javascript">
+		insertExamples([
+				         "(quote a)",
+				         "(car (quote (a b c)))",
+				         "(cdr (quote (a b c)))",
+				         "(cons (quote a) (quote (b c)))",
+				         "(equal (car (quote (a b))) (quote a))",
+				         "(cond ((atom (quote a)) (quote b)) ((quote t) (quote c)))",
+				         "((lambda (X Y) (cons (car X) Y)) (quote (a b)) (cdr (quote (c d))))",
+				         "((label ff (lambda (x) (cond ((atom x) x) ((quote t) (ff (car x)))))) (quote ((a b) c)))"
+				]);
+	</script>
+	<p>The <em>Micro-manual</em> also suggests <code>t Nil or and not null defun list</code> which I have included, and <code>cadr</code> with arbitrary combinations
+	 of 'a' and 'd', which I have not.  I've modified the following example slightly from that given in the paper as the empty list is not regarded as an
+	 atom in <em>javathcript</em>.</p>
+	
+	<script type="text/javascript">
+		insertExamples([
+				        "(defun subst (x y z) (cond ((or (atom z) (null z)) (cond ((equal z y) x) (t z))) (t (cons (subst x y (car z)) (subst x y (cdr z))))))",
+						"(subst (quote (plus x y)) (quote v) (quote (times x v)))"
+				]);
+	</script>
+	
+	<a name="functions-scope"><h3>Scope</h3></a>
+	
+	<code>def defun let let*</code>
+	
+	<p>As well as <code>defun</code> to set a name for a function in the global scope, there is also <code>def</code>, to allow you to set names for
+	other kinds of values in the global scope.  Functions provide their own scope, but you can also use <code>let</code> and <code>let*</code> to create
+	temporary scopes. The code example at the top of this page used <code>let*</code> to assign names for the button, the nameField and the clickHandler.</p>
+	
+	<a name="functions-sugar"><h3>Syntactic Sugar, Comments and Aliases</h3></a>
+	
+	<code>if ' ;</code>
+	
+	<p>You can quote something by simply putting the single quote in front of it.  This is a bit more terse than having to wrap it in <code>(quote ...)</code>.
+	Comments are lines that start with the <code>;</code> character.  <code>if</code> provides a slighly more intuitive alternative to <code>cond</code>.</p>
+	
+	<p>A number of aliases are provided in the <a href="lisp/prelude.lsp">prelude.lsp</a> file, eg. <code>eq eq? head tail first rest</code>, as well as
+	a number of useful functions, e.g. <code>map</code>.</p>
+	
+	<a name="functions-strings"><h3>Strings</h3></a>
+
+	<code>length concat substring</code>
+
+	<p>As well as atoms and lists, <em>Javathcript</em> also provides some support for strings  Strings literals can
+	be entered by surrounding them in double quotes.</p>
+	
+	<p>Most functions that work on lists will also work on strings, although unlike in some lisps, <em>Javathcript</em> strings are not lists.
+	Also note that <code>concat</code> if started with a string will concatenate numbers into the string too.</p>
+
+	<script type="text/javascript">
+		insertExamples([
+				        "(concat (substring (concat \"hello everyone\" \" in the room\") 6 18) \"number \" 23)",
+				        "(head (tail \"abc\"))",
+				        "(length \"Do not ask for whom the bell tolls\")",
+				        "; Empty string is equal to null\n\t(null \"\")"
+				]);
+	</script>
+	
+	<a name="functions-numbers"><h3>Numbers and Maths</h3></a>
+	
+	<code>plus minus divide times rem &lt; &gt; &lt;= &gt;= = /=</code>
+	
+	<p><em>Javathcript</em> supports numeric literals, and the normal arithmetic functions (which are aliased by <a href="lisp/prelude.lsp">prelude.lsp</a> to be accessible by the symbols too).</p>
+	
+	<code>sin cos tan asin acos atan floor max min log abs ceil pow exp atan2 random sqrt round</code>
+	
+	<p>The <a href="lisp/prelude.lsp">prelude.lsp</a> also imports all the javascript Math functions.</p>
+	
+	<script type="text/javascript">
+		insertExamples([
+				        "(defun fibonacci (N) (if (< N 2) 1 (+ (fibonacci (- N 2)) (fibonacci (- N 1)))))",
+				        "(map fibonacci '(0 1 2 3 4 5))",
+				        "(defun factorial (N) (if (= N 1) 1 (* N (factorial (- N 1)))))",
+				        "(* (random) (factorial 5))",
+				        "(floor (sqrt (pow 5 5)))"
+				]);
+	</script>
+	
+	<a name="functions-objects"><h3>Objects</h3></a>
+
+	<code>set get</code>
+	
+	<p>Object literals can be entered surrounded by curly braces, similarly to in javascript.  <code>set</code> sets properties on them, and <code>get</code>
+	returns previously set properties.
+	</p>
+
+	<script type="text/javascript">
+		insertExamples([
+				        "(def obj {a: \"hello\", b: '(a b c), number: 0})",
+				        "(tail (get obj \"b\"))",
+				        "(set obj a (concat (get obj a) \" world\"))",
+				        "(get obj a)"
+				]);
+	</script>
+
+	<a name="functions-js"><h3>Interacting with Javascript and the Browser</h3></a>
+	
+	<code>js method export</code>
+	
+	<p>The <code>js</code> function evaluates its string argument, and returns the result.  If the result is a function, a small adjustment is made to it
+	so that it will evaluate its arguments in the current <em>Javathcript</em> scope before executing.  If the result is a function that belongs to an
+	object, executing separately will unbind the function from the object it was connected to (the <code>this</code> reference will be wrong).  In that
+	case, you should use <code>(method object "methodname")</code> to get a reference to the function that will execute against the provided object.</p>
+	
+	<p>While <em>Javathcript</em> functions turn into normal javascript functions, they are bound to the scope that they execute in, and won't work if
+	disconnected from that scope.  If you want to call them from, e.g. event handlers, then you can use the <code>export</code> function to create
+	a function with the scope boiled in.</p>
+	
+	<code>document body window getElement alert message confirm</code>
+	
+	<p>These functions are defined in the <a href="lisp/prelude.lsp">prelude.lsp</a> file, and provide you references to the document and the window.  <code>getElement</code> is
+	the same as javascript <code>getElementById</code>, and message is a synonym for <code>alert</code>.</p>
+
+	<script type="text/javascript">
+		insertExamples([
+		                "(if (confirm \"Self destruct?\")\n\t(message \"Actually, I don't think I will.\")\n\t(message \"Fair enough.\")\n)",
+		                "(get body offsetWidth)",
+		                "; Make sure your window isn't maximised if you want this to work\n\t(let\t((moveBy (method window \"moveBy\")))\n\t\t(moveBy (- (* (random) 10) 5) (- (* (random) 10) 5) ))"
+		                ]);
+	</script>
+
+	<a name="have-a-go"><h2>Have a go</h2></a>
+	
+	<textarea id='code_entry'>(concat "PI is " PI)</textarea>
+	<pre id='code_result' class='result'></pre>
+	<button id='eval' onclick="evaluateElement('code_entry', 'code_result')">Evaluate</button>
+
+	<a name="getting-source"><h2>Getting the Source</h2></a>
+	
+	<p>The project is hosted on github <a href="https://github.com/kybernetikos/Javathcript">here</a>.  Depending on your setup, the following
+	commands should get you a local copy of the code.
+	 
+<pre>git clone git@github.com:kybernetikos/Javathcript.git</pre>
+
+	<a name="limitations"><h2>Limitations</h2></a>
+	
+	<p>This implementation does not have any tail recursion optimisations or macros.  I haven't spent any time making it fast, so it is unlikely to be
+	suitable for performance sensitive applications.</p>
+	 
+	<a name="acknowledgements"><h2>Acknowledgements</h2></a>
+
+	<p>Parsing is done with parsing code that I ported from Java.  The original java is the code that accompanies the book 
+	<a href="http://oozinoz.xp123.com/bpwj.htm">Building Parsers With Java</a> and is copyright Steven J. Metsker.</p>
+	
+	<p>The lisp engine was created by me, based on 
+	<a href="http://scholar.google.co.uk/scholar?cluster=8012033452170110322&hl=en&as_sdt=2000">A Micro-Manual for Lisp - Not the whole truth</a>
+	by John McCarthy.</p>
+	
+	<p>Although <em>Javathcript</em> doesn't take code from other projects, running lisp variants in the browser is not a new thing.  It's been done
+	 before by at least:
+		<ul>
+			<li>Douglas Crockford's <a href="http://www.crockford.com/javascript/scheme.html">little scheme</a>.</li>
+			<li>Steve Lacey's <a href="http://stevela.github.com/js-lisp/">js-lisp</a>.</li>
+			<li>Joe Ganley's <a href="http://joeganley.com/code/jslisp.html">jslisp</a>.</li>
+			<li>Brian Morearty's <a href="http://www.ducklet.com/jisp/">jisp</a>.</li>
+			<li>Marc Belmot's <a href="http://marcbelmont.com/projects/lisp-interpreter-javascript-jquery/">lisp interpreter</a>.</li>
+			<li>Paul Park's <a href="http://www.parkscomputing.com/lisptest.html">lisp test</a>.</li>
+		</ul>
+	 
+	 <a name="contact"><h2>Contact</h2></a>
+	 
+	 <p>You can contact me by email at <div id='mail'></div></p>
+</body>
+
+</html>

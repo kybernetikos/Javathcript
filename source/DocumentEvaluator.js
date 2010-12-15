@@ -58,8 +58,8 @@ window.onload = function() {
 		var script = scripts[i];
 		if (script.getAttribute("type") == "text/lisp") {
 			var src = script.getAttribute("src");
-			if (src != null) {
-				WorkQueue.add(evalFileJob(src));
+			if (src != null && src != "") {
+  				WorkQueue.add(evalFileJob(src));
 			} else {
 				WorkQueue.add(evalScriptTagJob(script.text));
 			}

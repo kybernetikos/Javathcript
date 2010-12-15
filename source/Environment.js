@@ -66,7 +66,11 @@ var Environment = (function() {
 	};
 	
 	Environment.prototype["car"] = function(args) {
-		return this["_value"](args)[0];
+		var item = this["_value"](args);
+		if (typeof(item) == 'string') {
+			return item.substring(0, 1);
+		}
+		return item[0];
 	};
 	
 	
@@ -180,12 +184,19 @@ var Environment = (function() {
  		if (property instanceof Atom) {
  			property = property.name;
  		}
- 		if (! val[property] || typeof(val[property]) != "function") {
+ 		var func = val[property];
+ 		// some weird stuff happens with native functions in IE
+ 		if (typeof(func) == 'object' && typeof(window.alert) == 'object') {
+ 			func = function(a, b, c, d, e, f, g, h, i) {
+ 				return val[property](a, b, c, d, e, f, g, h, i);
+ 			};
+ 		}
+ 		if (typeof(func) != "function") {
  			throw new Error("Method "+property+" not found on object "+val);
  		}
  		return function() {
  			var args = this["_valueArray"](arguments);
- 			var jsResult = val[property].apply(val, args);
+ 			var jsResult = func.apply(val, args);
  			return wrapJsResult(jsResult);
  		};
  	};
