@@ -153,7 +153,7 @@
 				]);
 	</script>
 	<p>The <em>Micro-manual</em> also suggests <code>t Nil or and not null defun list</code> which I have included, and <code>cadr</code> with arbitrary combinations
-	 of 'a' and 'd', which I have not.  I've modified the following example slightly from that given in the paper as the empty list is not regarded as an
+	 of 'a' and 'd', some of which are in the prelude.  I've modified the following example slightly from that given in the paper as the empty list is not regarded as an
 	 atom in <em>javathcript</em>.</p>
 	
 	<script type="text/javascript">
@@ -275,7 +275,7 @@
 		]);	
 	</script>
 	
-	<p>The <em>Micro-manual</em> included a Lisp interpreter written in lisp.  Here is a slightly modification of it that I took from <a href="http://lib.store.yahoo.net/lib/paulgraham/jmc.lisp">here</a>.</p>
+	<p>The <em>Micro-manual</em> included a Lisp interpreter written in lisp.  Here is a slight modification of it that I took from <a href="http://lib.store.yahoo.net/lib/paulgraham/jmc.lisp">here</a>.</p>
 
 	<script type="text/javascript">
 		insertExamples([";\n; The Lisp defined in McCarthy's 1960 paper, translated into CL.\n; Assumes only quote, atom, eq, cons, car, cdr, cond.\n; Bug reports to lispcode@paulgraham.com.\n(defun null. (x)\n  (eq x '()))",
@@ -317,7 +317,7 @@
 						"        ('t (cons (eval.  (car m) a)\n"+
 						"                  (evlis. (cdr m) a)))))",
 						"; Now to use it..\n"+
-						"(eval. '(car (quote (a b c))))"
+						"(eval. '(cons (quote x) (cdr (quote (a b c)))))"
 		]);	
 	</script>
 
