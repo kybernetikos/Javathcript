@@ -134,48 +134,38 @@ var Environment = (function() {
 		}
 	};
 	
-	Environment.prototype["lambda"] = function(variables, expression) {
-		console.log("evaluating lambda "+variables.join(" "));
-		var func = function() {
-			console.log("executing lambda "+variables.join(" "));
-			var funcScope = newScope(this);
-
-			// Our scope the parent closures scope if there was one.
-			if (arguments.callee._parentScope) {
-				console.log(".. merging...");
-				console.log(arguments.callee._parentScope);
+	function addNonGlobalsFromScope(into, merge) {
+		for (var x in merge) {
+			if (merge[x] != globalScope[x]) {
+				into[x] = merge[x];
 			}
-			mergeScope(funcScope, arguments.callee._parentScope);
-
-			// tmpScope contains all the variables evaluated for this function
+		}
+	}
+	
+	Environment.prototype["lambda"] = function(variables, expression) {
+		// scope when function is defined
+		var defScopeNonglobals = {};
+		addNonGlobalsFromScope(defScopeNonglobals, this);
+		
+		var func = function() {
+			// scope when function is called
+			var funcScope = newScope(this);
+			
+			// add all nonglobal values into this funcscope
+			mergeScope(funcScope, defScopeNonglobals);
+			
 			var args = this["_valueArray"](arguments, variables.length);
 			for (var i = 0; i < variables.length; ++i) {
-				console.log(".. binding "+variables[i]+" to "+args[i]);
 				funcScope[variables[i]] = args[i];
 			}
-
-			// It contains the label if this function has a label
 			if (arguments.callee["label"] != null) {
 				funcScope[arguments.callee["label"]] = arguments.callee;
 			}
 
-			var resultingVal = funcScope._value(expression);
-			if (typeof(resultingVal) == 'function') {
-				// we need to copy our variables into their scope.
-				console.log("lambda "+variables.join(" ")+" returns a function");
-				resultingVal._parentFunc = arguments.callee;
-				resultingVal._parentScope = funcScope;
-				console.log(funcScope["n"]);
-				console.log(funcScope["r"]);
-				console.log("... adding parent scope to function "+resultingVal);
-			}
-			return resultingVal;
+			return funcScope._value(expression);
 		};
 		func.toString = function() {
-			var result = "\u03bb"+stringify(variables)+stringify(expression);
-			console.log("... "+result+" with extra bindings:");
-			console.log(func._parentScope);
-			return result;
+			return "\u03bb"+stringify(variables)+stringify(expression);
 		};
 		return func;
 	};
@@ -265,13 +255,11 @@ var Environment = (function() {
 	Environment.prototype["defun"] = function(name, variables, expression) {
 		var func = this["lambda"](variables, expression);
 		globalScope[name] = func;
-		console.log("defun "+name+" "+globalScope[name]);
 		return func;
 	};
 	
 	Environment.prototype["def"] = function(name, value) {
 		globalScope[name] = this["_value"](value);
-		console.log("def "+name+" "+globalScope[name]);
 		return value;
 	};
 	
