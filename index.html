@@ -115,7 +115,7 @@
 	<a name="usage"><h2>Example Usage</h2></a>
 	
 	<p>Since the browser doesn't natively understand script tags with <code>type="text/lisp"</code>, the <a href="webcontent/Javathcript.js">Javathcript.js</a> file
-	is included in the header to provide parsing and evaluation for lisp code.  We have also included the <a href="webcontent/lisp/prelude.lsp">prelude.lsp</a> lisp
+	is included in the header to provide parsing and evaluation for lisp code.  I have also included the <a href="webcontent/lisp/prelude.lsp">prelude.lsp</a> lisp
 	source file in the header since it defines a number of functions that this code uses (e.g. <code>getElement</code> and <code>alert</code>).
 	To include these files, the following script tags are in the head of this page.  Note that the <code>prelude.lsp</code> file has to be served from the same
 	server as any page that uses it, as it is fetched by an XHR.
@@ -148,7 +148,7 @@
 	<a name="functions-basic"><h3>Functions from <em>A Micro-manual for Lisp - Not the Whole Truth</em></h3></a>
 	
 	<code>quote car cdr cons equal atom cond lambda label</code>  
-	<p>According to <a href="http://scholar.google.co.uk/scholar?cluster=8012033452170110322&hl=en&as_sdt=2000">A Micro-Manual for Lisp - Not the whole truth</a> , these functions provide the core of Lisp, and are enough to create a self-hosting LISP interpreter.  Here are some examples (click to evaluate them):</p>
+	<p>According to <a href="http://www.scribd.com/doc/54050141/Micro-Manual-LISP">A Micro-Manual for Lisp - Not the whole truth</a> , these functions provide the core of Lisp, and are enough to create a self-hosting LISP interpreter.  Here are some examples (click to evaluate them):</p>
 	<script type="text/javascript">
 		insertExamples([
 				         "(quote a)",
